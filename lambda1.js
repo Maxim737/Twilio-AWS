@@ -1,55 +1,41 @@
 const AWS = require('aws-sdk');
 const kinesis = new AWS.Kinesis({
-  region: 'REGION'
+  region: 'us-east-1'
 });
+const KINESIS_STREAM_NAME = "Kinesis-1";
+const PARTITION_KEY = "1";
 
 exports.handler = (event, context, callback) => {
-  console.log('LOADING handler');
-
-  const done = (err, res) => callback(null, {
-    statusCode: err ? '400' : '200',
-    body: err || res,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  const params = {
-    StreamName: 'STREAM_NAME',
-  };
-
-  kinesis.describeStream(params, function(err, data) {
-    if (err) console.log(err, err.stack);
+  kinesis.describeStream({StreamName: KINESIS_STREAM_NAME}, function(err, streamInfo) {
+    if (err) console.log(err);
     else {
-      //Make sure stream is able to take new writes (ACTIVE or UPDATING are good)
-      if(data.StreamDescription.StreamStatus === kinesisConstant.STATE.ACTIVE
-        || data.StreamDescription.StreamStatus === kinesisConstant.STATE.UPDATING ) {
-        // SAVE
-        if (typeof payload !== kinesisConstant.PAYLOAD_TYPE) {
-          try {
-            payload = JSON.stringify(payload);
-          } catch (e) {
-            console.log(e);
-          }
-        }
+      if(streamInfo.StreamDescription.StreamStatus === "ACTIVE" || streamInfo.StreamDescription.StreamStatus === "UPDATING" ) {
+        let payload = JSON.stringify(event);
 
-        let params = {
+        console.log(payload);
+
+        const params = {
           Data: payload,
-          PartitionKey: kinesisConstant.PARTITION_KEY,
-          StreamName: kinesisConstant.STREAM_NAME
+          PartitionKey: PARTITION_KEY,
+          StreamName: KINESIS_STREAM_NAME
         };
 
         kinesis.putRecord(params, function(err, data) {
-          if (err) console.log(err, err.stack);
+          if (err) console.log(err);
           else     console.log('Record added:',data);
         });
-
       } else {
-        console.log(`Kinesis stream ${kinesisConstant.STREAM_NAME} is ${data.StreamDescription.StreamStatus}.`);
-        console.log(`Record Lost`, JSON.parse(payload));
+        console.log(`Kinesis stream ${KINESIS_STREAM_NAME} is ${streamInfo.StreamDescription.StreamStatus}.`);
+        console.log(`Record Lost`, event);
       }
     }
   });
 
-  done(null, event);
-}
+  callback(null, {
+    statusCode: '200',
+    body: event,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
