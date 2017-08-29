@@ -1,16 +1,18 @@
-var AWS = require('aws-sdk');
-var firehose = new AWS.Firehose();
+const AWS = require('aws-sdk');
+const firehose = new AWS.Firehose({
+  region: "us-east-1a"
+});
 
 exports.handler = function(event, context) {
-  var params = {
+  const params = {
       DeliveryStreamName: '',
     Record: {
     Data: decodeURIComponent(event)
   }
 };
   firehose.putRecord(params, function(err, data) {
-    if (err) console.log(err, err.stack);
-    else console.log(data);
+    if (err) console.log(err);
+    else     console.log(data);
 
     context.done();
   });

@@ -1,7 +1,8 @@
-const AWS = require('aws-sdk');
+const AWS = require("aws-sdk");
 const kinesis = new AWS.Kinesis({
-  region: 'us-east-1'
+  region: "us-east-1"
 });
+
 const KINESIS_STREAM_NAME = "Kinesis-1";
 const PARTITION_KEY = "1";
 
@@ -22,7 +23,7 @@ exports.handler = (event, context, callback) => {
 
         kinesis.putRecord(params, function(err, data) {
           if (err) console.log(err);
-          else     console.log('Record added:',data);
+          else     console.log("Record added:", data);
         });
       } else {
         console.log(`Kinesis stream ${KINESIS_STREAM_NAME} is ${streamInfo.StreamDescription.StreamStatus}.`);
@@ -32,10 +33,10 @@ exports.handler = (event, context, callback) => {
   });
 
   callback(null, {
-    statusCode: '200',
-    body: event,
+    statusCode: "200",
+    body: "Response test data",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json"
     },
   });
 };
