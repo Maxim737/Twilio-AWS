@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const firehose = new AWS.Firehose({
-  region: "us-east-1a"
+  region: "us-east-1"
 });
 
 exports.handler = function(event, context) {

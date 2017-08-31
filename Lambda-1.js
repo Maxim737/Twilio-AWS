@@ -1,42 +1,50 @@
 const AWS = require("aws-sdk");
+const twilio = require("twilio");
 const kinesis = new AWS.Kinesis({
-  region: "us-east-1"
+  region: process.env.KINESIS_STREAM_REGION
 });
 
-const KINESIS_STREAM_NAME = "Kinesis-1";
-const PARTITION_KEY = "1";
-
 exports.handler = (event, context, callback) => {
-  kinesis.describeStream({StreamName: KINESIS_STREAM_NAME}, function(err, streamInfo) {
-    if (err) console.log(err);
-    else {
-      if(streamInfo.StreamDescription.StreamStatus === "ACTIVE" || streamInfo.StreamDescription.StreamStatus === "UPDATING" ) {
-        let payload = JSON.stringify(event);
+  const url = `https://${event.headers.Host}${event.requestContext.path}`;
+  const twilioSignature = event.headers["X-Twilio-Signature"];
 
-        console.log(payload);
+  let params = {};
+  let pairs = event.body.split("&");
+  pairs.forEach((pair) => {
+    pair = pair.split("=");
+    params[pair[0]] = decodeURIComponent(pair[1] || '');
+  });
 
-        const params = {
-          Data: payload,
-          PartitionKey: PARTITION_KEY,
-          StreamName: KINESIS_STREAM_NAME
-        };
+  // Validating that the request came directly from Twilio
+  if (twilio.validateRequest(process.env.TWILIO_AUTH_TOKEN, twilioSignature, url, params)) {
+    // Checking for the Kinesis Stream availability
+    kinesis.describeStream({StreamName: process.env.KINESIS_STREAM_NAME}, function(err, streamInfo) {
+      if (err) console.log(err);
+      else {
+        if(streamInfo.StreamDescription.StreamStatus === "ACTIVE" || streamInfo.StreamDescription.StreamStatus === "UPDATING" ) {
+          let payload = event.body;
 
-        kinesis.putRecord(params, function(err, data) {
-          if (err) console.log(err);
-          else     console.log("Record added:", data);
-        });
-      } else {
-        console.log(`Kinesis stream ${KINESIS_STREAM_NAME} is ${streamInfo.StreamDescription.StreamStatus}.`);
-        console.log(`Record Lost`, event);
+          console.log(payload);
+
+          const params = {
+            Data: payload,
+            PartitionKey: process.env.PARTITION_KEY,
+            StreamName: process.env.KINESIS_STREAM_NAME
+          };
+
+          kinesis.putRecord(params, function(err, data) {
+            if (err) console.log(err);
+            else     console.log("Record added:", data);
+          });
+        } else {
+          console.log(`Kinesis stream ${process.env.KINESIS_STREAM_NAME} is ${streamInfo.StreamDescription.StreamStatus}.`);
+          console.log(`Record Lost`, event.body);
+        }
       }
-    }
-  });
+    });
 
-  callback(null, {
-    statusCode: "200",
-    body: "Response test data",
-    headers: {
-      "Content-Type": "application/json"
-    },
-  });
+    callback(null, { statusCode: "200" });
+  } else {
+    callback(null, { statusCode: "401" });
+  }
 };
