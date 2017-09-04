@@ -3,7 +3,6 @@ let reqCount = 0;
 
 exports.handler = function(event, context) {
   reqCount = event.Records.length;
-  if (reqCount === 0) context.succeed();
 
   event.Records.forEach(function(record) {
     let recordData = Buffer.from(record.kinesis.data, 'base64').toString();

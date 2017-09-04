@@ -44,7 +44,9 @@ exports.handler = (event, context, callback) => {
     });
 
     callback(null, { statusCode: "200" });
+    context.succeed();
   } else {
     callback(null, { statusCode: "401" });
+    context.fail();
   }
 };
