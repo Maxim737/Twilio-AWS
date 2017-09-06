@@ -1,36 +1,42 @@
 CREATE TABLE events(
     ID BIGINT PRIMARY KEY IDENTITY(1, 1),
-    EventType VARCHAR(128),
-    AccountSid VARCHAR(256),
-    WorkspaceSid VARCHAR(256),
-    WorkspaceName VARCHAR(128),
-    EventDescription VARCHAR(256),
-    ResourceType VARCHAR(128),
-    ResourceSid VARCHAR(256),
+    Sid VARCHAR(512),
+    EventType VARCHAR(512),
+    AccountSid VARCHAR(512),
+    WorkspaceSid VARCHAR(512),
+    WorkspaceName VARCHAR(512),
+    EventDescription VARCHAR(512),
+    ResourceType VARCHAR(512),
+    ResourceSid VARCHAR(512),
     Timestamp INT,
-    TaskSid VARCHAR(256),
-    TaskAttributes VARCHAR(2048),
+    TaskSid VARCHAR(512),
+    TaskAttributes VARCHAR(4096),
     TaskAge INT,
     TaskPriority INT,
-    TaskAssignmentStatus VARCHAR(128),
-    TaskCanceledReason VARCHAR(512),
-    TaskCompletedReason VARCHAR(512),
-    WorkerSid VARCHAR(256),
-    WorkerName VARCHAR(128),
-    WorkerAttributes VARCHAR(2048),
-    WorkerActivitySid VARCHAR(256),
-    WorkerActivityName VARCHAR(128),
+    TaskAssignmentStatus VARCHAR(512),
+    TaskCanceledReason VARCHAR(1024),
+    TaskCompletedReason VARCHAR(1024),
+    WorkerSid VARCHAR(512),
+    WorkerName VARCHAR(512),
+    WorkerAttributes VARCHAR(4096),
+    WorkerActivitySid VARCHAR(512),
+    WorkerActivityName VARCHAR(512),
     WorkerTimeInPreviousActivity INT,
-    WorkerPreviousActivitySid VARCHAR(256),
-    Task VARCHAR(1024),
-    WorkflowSid VARCHAR(256),
-    TaskQueueSid VARCHAR(256),
+    WorkerPreviousActivitySid VARCHAR(512),
+    Task VARCHAR(4096),
+    WorkflowSid VARCHAR(512),
+    WorkflowName VARCHAR(512),
+    TaskChannelSid VARCHAR(512),
+    TaskChannelUniqueName VARCHAR(512),
+    TaskQueueSid VARCHAR(512),
+    TaskQueueName VARCHAR(512),
     Worker VARCHAR(512),
-    ReservationSid VARCHAR(256),
-    OtherData VARCHAR(2048)
+    ReservationSid VARCHAR(512),
+    OtherData VARCHAR(4096)
 );
 
 PARAMETER                       DESCRIPTION
+Sid
 EventType                       An identifier for this event
 AccountSid                      The account owning this event
 WorkspaceSid                    The Workspace Sid generating this event
@@ -55,14 +61,12 @@ WorkerTimeInPreviousActivity	The time spent in the previous activity (in seconds
 WorkerPreviousActivitySid       The previous activity sid prior to this state change
 Task                            The task
 WorkflowSid                     The SID of the workflow that was executed
+WorkflowName
+TaskChannelSid
+TaskChannelUniqueName
 TaskQueueSid                    The SID of the taskqueue that the task belongs to
+TaskQueueName
 Worker                          The worker
 ReservationSid                  The SID of the reservation
 
 OtherData                       Any additional data
-
-        "WorkflowName": "Twilio Contact Center Workflow",
-        "Sid": "EV6788390241ea32b8a4e86eb71b03a676",
-        "TaskChannelUniqueName": "default",
-        "TaskChannelSid": "TC976b57d176936df0b19e334ca8babdb7",
-        "TaskQueueName": "Event Dev Test Queue",

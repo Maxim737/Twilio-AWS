@@ -4,6 +4,7 @@ const firehose = new AWS.Firehose({
 });
 let reqCount = 0;
 const DATA_FIELDS = [
+  "Sid",
   "EventType",
   "AccountSid",
   "WorkspaceSid",
@@ -28,7 +29,11 @@ const DATA_FIELDS = [
   "WorkerPreviousActivitySid",
   "Task",
   "WorkflowSid",
+  "WorkflowName",
+  "TaskChannelSid",
+  "TaskChannelUniqueName",
   "TaskQueueSid",
+  "TaskQueueName",
   "Worker",
   "ReservationSid"
 ];
@@ -51,8 +56,8 @@ exports.handler = (event, context) => {
             record = Buffer.from(record.kinesis.data, 'base64').toString();
             let recordData = {};
             let otherData = {};
+            let isOtherData = false;
 
-            record += "&testAttr=37";
             let pairs = record.split("&");
             pairs.forEach((pair) => {
               pair = pair.split("=");
@@ -60,9 +65,11 @@ exports.handler = (event, context) => {
                 recordData[pair[0].toLowerCase()] = decodeURIComponent(pair[1] || '');
               } else {
                 otherData[pair[0]] = decodeURIComponent(pair[1] || '');
+                isOtherData = true;
               }
             });
-            recordData["otherdata"] = otherData;
+
+            isOtherData ? recordData["otherdata"] = otherData : '';
             recordData = JSON.stringify(recordData);
             console.log(recordData);
 
