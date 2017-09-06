@@ -1,54 +1,19 @@
-// function writeToFirehose(firehoseBatch, streamName, deliveryStreamName, callback, retries) {
-//   if (retries === undefined) {
-//     retries = 0;
-//   }
-//
-//   // write the batch to firehose with putRecordBatch
-//   var putRecordBatchParams = {
-//     DeliveryStreamName : deliveryStreamName.substring(0, 64),
-//     Records : firehoseBatch
-//   };
-//
-//   if (debug) {
-//     console.log('Writing to firehose delivery stream (' + retries + ')');
-//     console.log(JSON.stringify(putRecordBatchParams));
-//   }
-//
-//   var startTime = new Date().getTime();
-//   exports.firehose.putRecordBatch(putRecordBatchParams, function(err, data) {
-//     if (err) {
-//       console.log(JSON.stringify(err));
-//       callback(err);
-//     } else {
-//       if (data.FailedPutCount !== 0) {
-//         console.log("Failed to write " + data.FailedPutCount + "/" + firehoseBatch.length + " records. Retrying to write...");
-//         if (retries < MAX_RETRY_ON_FAILED_PUT) {
-//           // extract the failed records
-//           var failedBatch = [];
-//           data.RequestResponses.map(function(item, index) {
-//             if (item.hasOwnProperty('ErrorCode')) {
-//               failedBatch.push(firehoseBatch[index]);
-//             }
-//           });
-//
-//           setTimeout(exports.writeToFirehose.bind(undefined, failedBatch, streamName, deliveryStreamName, function(err) {
-//             if (err) {
-//               callback(err);
-//             } else {
-//               callback();
-//             }
-//           }, retries + 1), RETRY_INTERVAL_MS);
-//         } else {
-//           console.log('Maximum retries reached, giving up');
-//           callback(data);
-//         }
-//       } else {
-//         if (debug) {
-//           var elapsedMs = new Date().getTime() - startTime;
-//           console.log("Successfully wrote " + firehoseBatch.length + " records to Firehose " + deliveryStreamName + " in " + elapsedMs + " ms");
-//         }
-//         callback();
-//       }
-//     }
-//   });
-// }
+1. Lambda-1 setup.
+Apart from the "aws", the function also needs a "twilio" package, so both the function .js file and the node_modules directory has to be zipped and uploaded as code for Lambda-1.
+In configuration > Handler should be the name of the zipped function with .handler extension.
+Function validates the authenticity of the request (that the request came directly from Twilio and no data was corrupted) and puts the data record to the Kinesis stream.
+
+2. API Gateway setup.
+In API Gateway create some API. (e.g. LambdaMicroservice)
+In Lambda settings find Triggers > Add trigger, choose API Gateway and point the created API to Lambda function.
+In the created API, that is pointing to the function, create a POST method.
+Don't forget to Actions > Deploy API to deploy the changes or the endpoint won't be visible from the Internet.
+
+3. Kinesis Stream setup.
+Create Kinesis Stream, specify the name of the stream.
+
+4. Lambda-2A and Lambda-2B setup.
+Triggers > Add trigger, choose the created Kinesis Stream.
+Functions will poll that stream every second and run itself if there are any records present.
+
+5. Kinesis Firehose.

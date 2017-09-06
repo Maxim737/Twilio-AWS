@@ -1,0 +1,68 @@
+CREATE TABLE events(
+    ID BIGINT PRIMARY KEY IDENTITY(1, 1),
+    EventType VARCHAR(128),
+    AccountSid VARCHAR(256),
+    WorkspaceSid VARCHAR(256),
+    WorkspaceName VARCHAR(128),
+    EventDescription VARCHAR(256),
+    ResourceType VARCHAR(128),
+    ResourceSid VARCHAR(256),
+    Timestamp INT,
+    TaskSid VARCHAR(256),
+    TaskAttributes VARCHAR(2048),
+    TaskAge INT,
+    TaskPriority INT,
+    TaskAssignmentStatus VARCHAR(128),
+    TaskCanceledReason VARCHAR(512),
+    TaskCompletedReason VARCHAR(512),
+    WorkerSid VARCHAR(256),
+    WorkerName VARCHAR(128),
+    WorkerAttributes VARCHAR(2048),
+    WorkerActivitySid VARCHAR(256),
+    WorkerActivityName VARCHAR(128),
+    WorkerTimeInPreviousActivity INT,
+    WorkerPreviousActivitySid VARCHAR(256),
+    Task VARCHAR(1024),
+    WorkflowSid VARCHAR(256),
+    TaskQueueSid VARCHAR(256),
+    Worker VARCHAR(512),
+    ReservationSid VARCHAR(256),
+    OtherData VARCHAR(2048)
+);
+
+PARAMETER                       DESCRIPTION
+EventType                       An identifier for this event
+AccountSid                      The account owning this event
+WorkspaceSid                    The Workspace Sid generating this event
+WorkspaceName                   The Workspace Name generating this event
+EventDescription                A description of the event
+ResourceType                    The type of object this event is most relevant to (Task, Reservation, Worker)
+ResourceSid                     The sid of the object this event is most relevant to (TaskSid, ReservationSid, WorkerSid)
+Timestamp                       The time this event was sent
+TaskSid                         The SID of the task that changed
+TaskAttributes                  The JSON Attributes of the task
+TaskAge                         The age of the task
+TaskPriority                    The priority of the task
+TaskAssignmentStatus            The assignment status of the task
+TaskCanceledReason              The reason that task was canceled
+TaskCompletedReason             The reason that task was completed
+WorkerSid                       The SID of the worker that changed
+WorkerName                      The Friendly Name of the worker
+WorkerAttributes                The JSON Attributes of the worker
+WorkerActivitySid               The new activity sid of the worker
+WorkerActivityName              The new activity friendly name of the worker
+WorkerTimeInPreviousActivity	The time spent in the previous activity (in seconds)
+WorkerPreviousActivitySid       The previous activity sid prior to this state change
+Task                            The task
+WorkflowSid                     The SID of the workflow that was executed
+TaskQueueSid                    The SID of the taskqueue that the task belongs to
+Worker                          The worker
+ReservationSid                  The SID of the reservation
+
+OtherData                       Any additional data
+
+        "WorkflowName": "Twilio Contact Center Workflow",
+        "Sid": "EV6788390241ea32b8a4e86eb71b03a676",
+        "TaskChannelUniqueName": "default",
+        "TaskChannelSid": "TC976b57d176936df0b19e334ca8babdb7",
+        "TaskQueueName": "Event Dev Test Queue",

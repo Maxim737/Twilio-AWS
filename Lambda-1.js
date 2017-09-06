@@ -18,21 +18,17 @@ exports.handler = (event, context, callback) => {
   // Validating that the request came directly from Twilio
   if (twilio.validateRequest(process.env.TWILIO_AUTH_TOKEN, twilioSignature, url, params)) {
     // Checking for the Kinesis Stream availability
-    kinesis.describeStream({StreamName: process.env.KINESIS_STREAM_NAME}, function(err, streamInfo) {
+    kinesis.describeStream({StreamName: process.env.KINESIS_STREAM_NAME}, (err, streamInfo) => {
       if (err) console.log(err);
       else {
         if(streamInfo.StreamDescription.StreamStatus === "ACTIVE" || streamInfo.StreamDescription.StreamStatus === "UPDATING" ) {
-          let payload = event.body;
-
-          console.log(payload);
-
           const params = {
-            Data: payload,
+            Data: event.body,
             PartitionKey: process.env.PARTITION_KEY,
             StreamName: process.env.KINESIS_STREAM_NAME
           };
 
-          kinesis.putRecord(params, function(err, data) {
+          kinesis.putRecord(params, (err, data) => {
             if (err) console.log(err);
             else     console.log("Record added:", data);
           });
@@ -43,10 +39,12 @@ exports.handler = (event, context, callback) => {
       }
     });
 
-    callback(null, { statusCode: "200" });
-    context.succeed();
+    callback(null, { statusCode: "200", headers: {
+      "Content-Type": "application/json"
+    } });
   } else {
-    callback(null, { statusCode: "401" });
-    context.fail();
+    callback(null, { statusCode: "401", headers: {
+      "Content-Type": "application/json"
+    } });
   }
 };
