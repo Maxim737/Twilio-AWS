@@ -2,7 +2,6 @@ const AWS = require('aws-sdk');
 const firehose = new AWS.Firehose({
   region: "us-east-1"
 });
-let reqCount = 0;
 const DATA_FIELDS = [
   "Sid",
   "EventType",
@@ -27,7 +26,9 @@ const DATA_FIELDS = [
   "WorkerActivityName",
   "WorkerTimeInPreviousActivity",
   "WorkerPreviousActivitySid",
+  "WorkerPreviousActivityName",
   "Task",
+  "Reason",
   "WorkflowSid",
   "WorkflowName",
   "TaskChannelSid",
@@ -45,8 +46,6 @@ exports.handler = (event, context) => {
       context.fail(err);
     }
     else {
-      reqCount = event.Records.length;
-
       if(streamInfo.DeliveryStreamDescription.DeliveryStreamStatus === "ACTIVE" || streamInfo.DeliveryStreamDescription.DeliveryStreamStatus === "UPDATING" ) {
         for (let i = 0; i < event.Records.length; i += Number(process.env.RECORDS_LIMIT_PER_BATCH)) {
           let batch = event.Records.slice(i, i + Number(process.env.RECORDS_LIMIT_PER_BATCH));
@@ -81,7 +80,7 @@ exports.handler = (event, context) => {
             Records: records
           };
 
-          firehose.putRecordBatch(params, function(err, data) {
+          firehose.putRecordBatch(params, (err, data) => {
             if (err) console.log(err);
             else     console.log(data);
           });
